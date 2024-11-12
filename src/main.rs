@@ -1,9 +1,41 @@
 use std::io;
+use std::mem;
+
+pub struct NFA {
+    head: Link,
+}
+
+enum Link {
+    Empty,
+    More(Box<Node>),
+}
+
+struct Node {
+    elem: char,
+    next: Link,
+}
+
+impl NFA {
+    pub fn new() -> Self {
+        NFA { head : Link::Empty }
+    }
+
+    pub fn push(&mut self, elem: char) {
+        let new_node = Box::new(Node {
+            elem: elem,
+            next: mem::replace(&mut self.head, NFA::Empty),
+        });
+
+        self.head = Link::More(new_node);
+    }
+}
 
 fn main() {
     let mut finished = false;
+    let mut start_state: State;
+    start_state.content = 'a';
 
-    println!("\nThompson's Construction!\n");
+    println!("\nRustRegEx!\n");
     while !finished {
         println!("Enter a RegEx to be converted to an NFA: ");
 
@@ -21,9 +53,10 @@ fn main() {
             continue;
         }
 
+
         finished = !finished;
         
-        print_reg_ex(&reg_ex);
+//        print_reg_ex(&reg_ex, &num_of_special_char);
     }
 }
 
@@ -83,24 +116,3 @@ fn is_alter_valid(reg_ex: &str) -> bool {
     true
 }
 
-fn print_reg_ex(reg_ex: &str){
-    println!("Printing the FA");
-    let mut char_before: char = ' ';
-    for (i, c) in reg_ex.chars().enumerate() {
-        if i == 0 {
-            char_before = c;
-        } else { 
-            match c {
-                '|' => println!("Alter"),
-                '*' => println!("Closure"),
-                _ => concatenation(char_before, c, i) 
-            }
-        }
-    }
-}
-
-fn concatenation(c0: char, c1: char, i: usize) {
-    let eps = 'ε';
-    print!(" -> S_{0} ->{c0} S_{1} ->{eps} S_{2} ->{c1}", i-1, i, i + 1);
-}
-    
